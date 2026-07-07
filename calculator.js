@@ -4,6 +4,7 @@ function add(a, b) {
 }
 
 function subtract(a, b) {
+  // izvještaj: prati subtract operacije
   return a - b;
 }
 
