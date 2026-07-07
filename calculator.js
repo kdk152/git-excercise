@@ -22,5 +22,5 @@ function divide(a, b) {
 module.exports = { add, subtract, multiply, divide };
 
 function applyDiscount(amount, pct) {
-  return amount - (amount * pct)
+  return amount - (amount * (pct / 100));
 }
