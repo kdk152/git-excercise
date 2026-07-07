@@ -19,8 +19,8 @@ function divide(a, b) {
   return a / b;
 }
 
-module.exports = { add, subtract, multiply, divide };
 
 function applyDiscount(amount, pct) {
   return amount - (amount * (pct / 100));
 }
+module.exports = { add, subtract, multiply, divide, applyDiscount };
