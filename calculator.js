@@ -13,6 +13,7 @@ function multiply(a, b) {
 }
 
 function divide(a, b) {
+  // izvještaj: prati divide operacije
   return a / b;
 }
 
