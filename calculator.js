@@ -1,4 +1,5 @@
 function add(a, b) {
+  // izvještaj: prati add operacije
   return a + b;
 }
 
