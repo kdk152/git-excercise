@@ -69,64 +69,123 @@ Zadatak: Premjesti taj commit s main-a na feature/history-log,
 gdje mu je i mjesto. main se treba vratiti u stanje bez historyLog.js
 datoteke.
 
-### Rješenja
+# Rješenja
 
-## Rješenje 1 - Sukob pri spajanju
+## Rješenje 1 — Sukob pri spajanju
 
+Grana `feature/validation` dodaje validaciju ulaznih parametara u `add()` i `subtract()`, dok je `main` u međuvremenu dodao debug logiranje na iste linije.
+
+### Rješenje
+
+Spoji `feature/validation` u `main`, riješi sukob tako da konačni kod zadrži i `console.log(...)` linije i `typeof` provjere, zatim napravi commit.
+
+```bash
 git checkout main
 git merge feature/validation
 # sukob u calculator.js
 # uredi tako da zadržiš I console.log(...) linije I typeof provjere
 git add calculator.js
 git commit
+```
+
+### SourceTree
+
+Prebaci se na `main` → desni klik na `feature/validation` → **Merge into current branch** → riješi sukob u editoru → **Stage** → **Commit**.
+
 ---
-SourceTree: prebaci se na `main` → desni klik na `feature/validation` →
-Merge into current branch → riješi u editoru sukoba → stage → commit.
 
-## Rješenje 2 - Interaktivni rebase / squash
+## Rješenje 2 — Interaktivni rebase / squash
 
+Grana `feature/discount` sadrži više malih commitova koji predstavljaju jednu funkcionalnost.
+
+### Rješenje
+
+Pokreni interaktivni rebase, spoji commitove u jedan ili dva uredna commita s jasnom porukom, a zatim spoji granu u `main`.
+
+```bash
 git checkout feature/discount
 git rebase -i main
----
-Prvi commit ostavi kao `pick`, ostale označi kao `squash` (ili `fixup`),
-zatim napiši urednu poruku, npr. "Dodana funkcija applyDiscount(amount,
-pct)". Zatim:
----
+```
+
+Prvi commit ostavi kao `pick`, ostale označi kao `squash` (ili `fixup`), zatim napiši urednu poruku, npr.:
+
+```text
+Dodana funkcija applyDiscount(amount, pct)
+```
+
+Nakon toga:
+
+```bash
 git checkout main
 git merge feature/discount
+```
 
-## Rješenje 3 - Poništavanje merge commita
-
-git log --oneline --graph
-# pronađi merge commit "Merge branch 'feature/tax'" (efbcae7 je sam commit
-# poreza; merge commit je njegov roditelj s dva roditelja, jedan commit
-# ispod "Ažurirana dokumentacija s primjerima korištenja")
-git revert -m 1 <hash-merge-commita>
 ---
-`-m 1` govori Gitu da tretira `main` stranu kao mainline, pa se poništavaju
-samo promjene koje je `feature/tax` unio (uklanjanje/poništavanje efekta
-`taxUtils.js`), dok commit s dokumentacijom koji je došao poslije ostaje
-netaknut.
 
-## Rješenje 4 - Cherry-pick sa sukobom
+## Rješenje 3 — Poništavanje merge commita
 
+Grana `feature/tax` spojena je u `main`, ali sadrži bug. Nakon mergea napravljen je još jedan commit koji treba ostati sačuvan.
+
+### Rješenje
+
+Pronađi merge commit i poništi ga pomoću `git revert -m 1`.
+
+```bash
+git log --oneline --graph
+# pronađi merge commit "Merge branch 'feature/tax'"
+# (efbcae7 je sam commit poreza; merge commit je njegov roditelj
+# s dva roditelja, jedan commit ispod
+# "Ažurirana dokumentacija s primjerima korištenja")
+git revert -m 1 <hash-merge-commita>
+```
+
+`-m 1` govori Gitu da tretira `main` stranu kao **mainline**, pa se poništavaju samo promjene koje je `feature/tax` unio (`taxUtils.js`), dok commit **"Ažurirana dokumentacija s primjerima korištenja"** ostaje netaknut.
+
+---
+
+## Rješenje 4 — Cherry-pick sa sukobom
+
+Grana `hotfix/rounding-fix` sadrži jedan commit koji treba prenijeti na `main`, ali je `main` u međuvremenu promijenio istu funkciju.
+
+### Rješenje
+
+Prenesi samo taj commit pomoću `cherry-pick`, riješi sukob i nastavi postupak.
+
+```bash
 git checkout main
 git cherry-pick 8b5e4b2
 # sukob u calculator.js divide()
 # riješi tako da zadržiš I zaštitu od nule I Math.round(...) ispravak
 git add calculator.js
 git cherry-pick --continue
+```
 
-## Rješenje 5 - Commit na krivoj grani
-
-Nekoliko ispravnih pristupa; najjednostavniji:
 ---
+
+## Rješenje 5 — Commit na krivoj grani
+
+Commit s `historyLog.js` greškom je napravljen na `main`, umjesto na `feature/history-log`.
+
+### Rješenje
+
+Premjesti commit na ispravnu granu, a zatim ga ukloni s `main`.
+
+```bash
 git checkout feature/history-log
 git cherry-pick 71ac325      # donosi historyLog.js commit na pravu granu
+
 git checkout main
 git reset --hard HEAD~1      # uklanja ga s main-a (sigurno: sačuvan je na feature/history-log)
----
-Alternativa (također ispravna): `git branch feature/history-log-fix 71ac325`
-pa `git rebase --onto` trikovi, ili soft-reset + stash + ponovni commit na
-drugoj grani. Prihvati bilo koji pristup koji na kraju ostavi `historyLog.js`
-prisutnim na `feature/history-log` i odsutnim na `main`-u.
+```
+
+### Alternativa
+
+Također je ispravno koristiti:
+
+- `git branch feature/history-log-fix 71ac325`
+- `git rebase --onto`
+- `git reset --soft`
+- `git stash`
+- ponovni commit na drugoj grani
+
+Prihvati bilo koji pristup koji na kraju ostavi `historyLog.js` prisutnim na `feature/history-log`, a odsutnim na `main`.
